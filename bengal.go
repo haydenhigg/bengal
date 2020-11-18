@@ -10,7 +10,7 @@ import (
 	"github.com/dchest/stemmer/porter2" // snowball stemmer
 )
 
-func StemSentence(text string) []string {
+func StemExample(text string) []string {
 	unallowed := regexp.MustCompile(`[^0-9a-z ]`)
 	stem := porter2.Stemmer.Stem
 
@@ -34,7 +34,7 @@ func StemExamples(examples []string) [][]string {
 	return ret
 }
 
-type MultioutputMultinomialNB struct {
+type MultinomialNB struct {
 	vocabulary 	[]string							// all unique words in training set
 	Classes 	[][]string							// all unique classes per output feature
 
@@ -45,7 +45,7 @@ type MultioutputMultinomialNB struct {
 	Output 		[][]string
 }
 
-func NewModelFromVectors(input, output [][]string) MultioutputMultinomialNB {
+func NewModelFromVectors(input, output [][]string) MultinomialNB {
 	features := output[0]
 
 	vocabulary := unique(flatten2d(input))
@@ -88,7 +88,7 @@ func NewModelFromVectors(input, output [][]string) MultioutputMultinomialNB {
 		}
 	}
 
-	return MultioutputMultinomialNB{
+	return MultinomialNB{
 		vocabulary: vocabulary,
 		Classes: classes,
 
@@ -99,11 +99,11 @@ func NewModelFromVectors(input, output [][]string) MultioutputMultinomialNB {
 		Output: output}
 }
 
-func NewModel(examples []string, output [][]string) MultioutputMultinomialNB {
+func NewModel(examples []string, output [][]string) MultinomialNB {
 	return NewModelFromVectors(StemExamples(exampleInput), output)
 }
 
-func (model MultioutputMultinomialNB) PredictVector(input []string) []string {
+func (model MultinomialNB) PredictVector(input []string) []string {
 	ret := make([]string, len(model.Classes))
 
 	for i, class := range model.Classes {
@@ -125,6 +125,6 @@ func (model MultioutputMultinomialNB) PredictVector(input []string) []string {
 	return ret
 }
 
-func (model MultioutputMultinomialNB) Predict(example string) []string {
+func (model MultinomialNB) Predict(example string) []string {
 	return model.RawPredict(StemSentence(example))
 }
