@@ -57,4 +57,4 @@ func main() {
 
 The multiple output features are (as far as I know) a novel addition to the algorithm, and are only helpful for select tasks. To clarify:
 1) **This implementation still functions exactly like a regular Multinomial Naive Bayes classifier if each element in the output slice has only one element.**
-2) **The output features are completely independent from one another, as if they were part of two separate classifiers -- for performance and memory efficiency, however, it is easier to clump them together as "features" rather than creating two separate classifiers.
+2) **The output features are completely independent from one another, as if they were part of two separate classifiers -- for performance and memory efficiency, however, it is easier to clump them together as "features" rather than creating two separate classifiers.**
