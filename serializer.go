@@ -10,11 +10,11 @@ import (
 	"encoding/json"
 )
 
-func (model *MultioutputMultinomialNB) Serialize() ([]byte, error) {
+func (model *MultinomialNB) Serialize() ([]byte, error) {
 	return json.Marshal(model)
 }
 
-func Deserialize(bytes []byte) (*MultioutputMultinomialNB, error) {
+func Deserialize(bytes []byte) (*MultinomialNB, error) {
 	var model MultioutputMultinomialNB
 
 	if err := json.Unmarshal(bytes, &model); err != nil {
@@ -24,7 +24,7 @@ func Deserialize(bytes []byte) (*MultioutputMultinomialNB, error) {
 	}
 }
 
-func (model MultioutputMultinomialNB) SerializeTo(filename string) ([]byte, error) {
+func (model MultinomialNB) SerializeTo(filename string) ([]byte, error) {
 	f, err := os.Create(filename)
 	if err != nil { return []byte{}, err }
 	defer f.Close()
@@ -38,7 +38,7 @@ func (model MultioutputMultinomialNB) SerializeTo(filename string) ([]byte, erro
 	}
 }
 
-func DeserializeFrom(filename string) (*MultioutputMultinomialNB, error) {
+func DeserializeFrom(filename string) (*MultinomialNB, error) {
 	f, err := os.Open(filename)
 	if err != nil { return nil, err }
 	defer f.Close()
