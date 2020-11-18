@@ -15,7 +15,7 @@ func (model *MultinomialNB) Serialize() ([]byte, error) {
 }
 
 func Deserialize(bytes []byte) (*MultinomialNB, error) {
-	var model MultioutputMultinomialNB
+	var model MultinomialNB
 
 	if err := json.Unmarshal(bytes, &model); err != nil {
 		return nil, err
