@@ -1,6 +1,6 @@
 # bengal
 
-Easy-to-use Multinomial Naive Bayes for text classification, optimized for multiple output features.
+Easy-to-use Go implementation of the multinomial Naive Bayes for text classification, optimized for multiple output features.
 
 ## install
 
