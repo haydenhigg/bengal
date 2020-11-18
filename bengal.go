@@ -7,7 +7,7 @@ package bengal
 import (
 	"strings"
 	"regexp"
-	"github.com/dchest/stemmer/porter2" // snowball stemmer
+	"github.com/dchest/stemmer/porter2"
 )
 
 func StemExample(text string) []string {
@@ -28,7 +28,7 @@ func StemExamples(examples []string) [][]string {
 	ret := make([][]string, len(examples))
 
 	for i, ex := range examples {
-		ret[i] = StemSentence(ex)
+		ret[i] = StemExample(ex)
 	}
 
 	return ret
@@ -126,5 +126,5 @@ func (model MultinomialNB) PredictVector(input []string) []string {
 }
 
 func (model MultinomialNB) Predict(example string) []string {
-	return model.RawPredict(StemSentence(example))
+	return model.RawPredict(StemExample(example))
 }
