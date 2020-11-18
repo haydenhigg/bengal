@@ -100,7 +100,7 @@ func NewModelFromVectors(input, output [][]string) MultinomialNB {
 }
 
 func NewModel(examples []string, output [][]string) MultinomialNB {
-	return NewModelFromVectors(StemExamples(exampleInput), output)
+	return NewModelFromVectors(StemExamples(examples), output)
 }
 
 func (model MultinomialNB) PredictVector(input []string) []string {
@@ -126,5 +126,5 @@ func (model MultinomialNB) PredictVector(input []string) []string {
 }
 
 func (model MultinomialNB) Predict(example string) []string {
-	return model.RawPredict(StemExample(example))
+	return model.PredictVector(StemExample(example))
 }
