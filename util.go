@@ -54,14 +54,6 @@ func sum(arr []int) int {
 	return ret
 }
 
-func tryDivide(a, b int) float64 {
-	if b != 0 {
-		return float64(a) / float64(b)
-	} else {
-		return math.Inf(a)
-	}
-}
-
 func argmax(m map[string]float64) string {
 	bestArg := ""
 	bestVal := math.Inf(-1)
