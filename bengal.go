@@ -2,6 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
 package bengal
 
 import (
@@ -35,10 +39,10 @@ func StemExamples(examples []string) [][]string {
 }
 
 type MultinomialNB struct {
-	vocabulary 	[]string							// all unique words in training set
-	Classes 	[][]string							// all unique classes per output feature
+	vocabulary 	[]string				// all unique words in training set
+	Classes 	[][]string				// all unique classes per output feature
 
-	Prior 		[]map[string]float64				// class frequencies per output feature
+	Prior 		[]map[string]float64			// class frequencies per output feature
 	Condprob 	[]map[string]map[string]float64		// conditional probability maps per output feature
 
 	Input 		[][]string
@@ -83,7 +87,7 @@ func NewModelFromVectors(input, output [][]string) MultinomialNB {
 					condprob[i][token] = make(map[string]float64)
 				}
 
-				condprob[i][token][c] = tryDivide(tokenCountsForClass[t], sum(tokenCountsForClass))
+				condprob[i][token][c] = float64(tokenCountsForClass[t] + 1) / float64(sum(tokenCountsForClass) + len(tokenCountsForClass))
 			}
 		}
 	}
