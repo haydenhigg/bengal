@@ -18,7 +18,7 @@ func unique(arr []string) []string {
 	keys := make([]string, len(uniqueWords))
 	i := 0
 
-    for k := range uniqueWords {
+	for k := range uniqueWords {
 		keys[i] = k
 		i++
 	}
@@ -49,7 +49,9 @@ func getColumn(mat [][]string, index int) []string {
 func sum(arr []int) int {
 	ret := 0
 
-	for _, v := range arr { ret += v }
+	for _, v := range arr {
+		ret += v
+	}
 
 	return ret
 }
