@@ -8,6 +8,8 @@ import (
 	"strings"
 	"regexp"
 	"github.com/dchest/stemmer/porter2"
+
+	"math"
 )
 
 func StemExample(text string) []string {
@@ -68,7 +70,7 @@ func NewModelFromVectors(input, output [][]string) MultinomialNB {
 				}
 			}
 
-			prior[i][c] = float64(len(examplesInClass)) / float64(len(input))
+			prior[i][c] = math.Log1p(float64(len(examplesInClass)) / float64(len(input)))
 
 			tokenCountsForClass := make([]int, len(vocabulary))
 			for j, token := range vocabulary {
@@ -83,7 +85,8 @@ func NewModelFromVectors(input, output [][]string) MultinomialNB {
 					condprob[i][token] = make(map[string]float64)
 				}
 
-				condprob[i][token][c] = float64(tokenCountsForClass[t] + 1) / float64(sum(tokenCountsForClass) + len(tokenCountsForClass))
+				nonMonotonic := float64(tokenCountsForClass[t] + 1) / float64(sum(tokenCountsForClass) + len(tokenCountsForClass))
+				condprob[i][token][c] = math.Log1p(nonMonotonic)
 			}
 		}
 	}
