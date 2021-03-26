@@ -13,7 +13,7 @@ import (
 )
 
 func StemExample(text string) []string {
-	unallowed := regexp.MustCompile("[^0-9a-z ]")
+	unallowed := regexp.MustCompile("[^0-9a-z]")
 	stem := porter2.Stemmer.Stem
 
 	words := strings.Fields(strings.ToLower(strings.Trim(text, "\t\n\f\r ")))
