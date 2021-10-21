@@ -37,11 +37,11 @@ func StemExamples(examples []string) [][]string {
 }
 
 type MultinomialNB struct {
-	vocabulary 	[]string				// all unique words in training set
-	Classes 	[][]string				// all unique classes per output feature
+	vocabulary 	[]string                        // all unique words in training set
+	Classes 	[][]string                      // all unique classes per output feature
 
-	Prior 		[]map[string]float64			// class frequencies per output feature
-	Condprob 	[]map[string]map[string]float64		// conditional probability maps per output feature
+	Prior 		[]map[string]float64            // class frequencies per output feature
+	Condprob 	[]map[string]map[string]float64 // conditional probability maps per output feature
 
 	Input 		[][]string
 	Output 		[][]string
