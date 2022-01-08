@@ -4,7 +4,9 @@ Easy-to-use Go implementation of the multinomial Naive Bayes for multilabel text
 
 ## install
 
-`$ go get -u github.com/haydenhigg/bengal`
+```bash
+$ go get -u github.com/haydenhigg/bengal
+```
 
 Then, import it as:
 ```go
@@ -15,8 +17,8 @@ import "github.com/haydenhigg/bengal"
 
 ### modeling
 
-- `NewModelFromVectors(input, output [][]string) MultinomialNB`: Creates a model from tokenized inputs.
-- `(model *MultinomialNB) PredictVector(x []string) []string`: Predicts the classes of the tokenized input.
+- `NewModel(input, output [][]string) MultinomialNB`: Creates a model from tokenized inputs.
+- `(model *MultinomialNB) Predict(x []string) []string`: Predicts the classes of a tokenized input.
 
 ### example
 
