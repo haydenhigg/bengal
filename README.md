@@ -4,7 +4,7 @@ Easy-to-use Go implementation of the multinomial Naive Bayes for multilabel text
 
 ## install
 
-`$ go get -u https://github.com/haydenhigg/bengal`
+`$ go get -u github.com/haydenhigg/bengal`
 
 Then, import it as:
 ```go
