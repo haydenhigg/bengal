@@ -1,133 +1,114 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
-
 package bengal
 
-import (
-	"strings"
-	"regexp"
-	"github.com/dchest/stemmer/porter2"
-
-	"math"
-)
-
-func StemExample(text string) []string {
-	unallowed := regexp.MustCompile("[^0-9a-z]")
-	stem := porter2.Stemmer.Stem
-
-	words := strings.Fields(strings.ToLower(strings.Trim(text, "\t\n\f\r ")))
-	ret := make([]string, len(words))
-
-	for i, w := range words {
-		ret[i] = stem(unallowed.ReplaceAllLiteralString(w, ""))
-	}
-	
-	return ret
-}
-
-func StemExamples(examples []string) [][]string {
-	ret := make([][]string, len(examples))
-
-	for i, ex := range examples {
-		ret[i] = StemExample(ex)
-	}
-
-	return ret
-}
+import "math"
 
 type MultinomialNB struct {
 	vocabulary []string                        // all unique words in training set
 	Classes    [][]string                      // all unique classes per output feature
 
 	Prior      []map[string]float64            // class frequencies per output feature
-	Condprob   []map[string]map[string]float64 // conditional probability maps per output feature
+	CondProb   []map[string]map[string]float64 // conditional probability maps per output feature
 
 	Input      [][]string
 	Output     [][]string
 }
 
-func NewModelFromVectors(input, output [][]string) MultinomialNB {
-	features := output[0]
+func NewModel(input, output [][]string) MultinomialNB {
+	features := len(output[0])
 
 	vocabulary := unique(flatten2d(input))
-	classes := make([][]string, len(features))
+	classes := make([][]string, features)
 
-	prior := make([]map[string]float64, len(features))
-	condprob := make([]map[string]map[string]float64, len(features))
+	prior := make([]map[string]float64, features)
+	condprob := make([]map[string]map[string]float64, features)
 
-	for i := range features {
-		classes[i] = unique(getColumn(output, i))
+	for f := 0; f < features; f++ {
+		// Get classes for this feature
+		featureClasses := make([]string, len(output))
 
-		prior[i] = make(map[string]float64)
-		condprob[i] = make(map[string]map[string]float64)
+		for i, y := range output {
+			featureClasses[i] = y[f]
+		}
 
-		for _, c := range classes[i] {
+		classes[f] = unique(featureClasses)
+		
+		// Get prior and condprob for this feature
+		prior[f] = make(map[string]float64)
+		condprob[f] = make(map[string]map[string]float64)
+
+		for _, class := range classes[f] {
+			// Find class examples
 			var examplesInClass [][]string
-			for j, inp := range input {
-				if output[j][i] == c {
-					examplesInClass = append(examplesInClass, inp)
+
+			for i, x := range input {
+				if output[i][f] == class {
+					examplesInClass = append(examplesInClass, x)
 				}
 			}
 
-			prior[i][c] = math.Log1p(float64(len(examplesInClass)) / float64(len(input)))
+			// Define prior probabilities from raw class frequency
+			prior[f][class] = math.Log1p(float64(len(examplesInClass)) / float64(len(input)))
 
-			tokenCountsForClass := make([]int, len(vocabulary))
-			for j, token := range vocabulary {
-				tc := 0
-				for _, word := range flatten2d(examplesInClass) { if word == token { tc++ } }
+			// Count tokens in class examples
+			examplesInClassVocabulary := flatten2d(examplesInClass)
+			tokenCounts := make(map[string]int)
 
-				tokenCountsForClass[j] = tc
+			for _, token := range examplesInClassVocabulary {
+				if _, ok := tokenCounts[token]; ok {
+					tokenCounts[token]++
+				} else {
+					tokenCounts[token] = 1
+				}
 			}
 
-			for t, token := range vocabulary {
-				if _, ok := condprob[i][token]; !ok {
-					condprob[i][token] = make(map[string]float64)
+			// Define conditional probabilities
+			for _, token := range vocabulary {
+				if _, ok := condprob[f][token]; !ok {
+					condprob[f][token] = make(map[string]float64)
 				}
 
-				nonMonotonic := float64(tokenCountsForClass[t] + 1) / float64(sum(tokenCountsForClass) + len(tokenCountsForClass))
-				condprob[i][token][c] = math.Log1p(nonMonotonic)
+				thisTokenCount := 0
+
+				if tokenCount, ok := tokenCounts[token]; ok {
+					thisTokenCount = tokenCount
+				}
+
+				nonMonotonic := float64(1 + thisTokenCount) / float64(len(examplesInClassVocabulary) + len(vocabulary))
+				condprob[f][token][class] = math.Log1p(nonMonotonic)
 			}
 		}
 	}
 
-	return MultinomialNB{
+	return MultinomialNB {
 		vocabulary: vocabulary,
 		Classes: classes,
 
 		Prior: prior,
-		Condprob: condprob,
+		CondProb: condprob,
 		
 		Input: input,
-		Output: output}
+		Output: output,
+	}
 }
 
-func NewModel(examples []string, output [][]string) MultinomialNB {
-	return NewModelFromVectors(StemExamples(examples), output)
-}
-
-func (model MultinomialNB) PredictVector(input []string) []string {
+func (model MultinomialNB) Predict(x []string) []string {
 	ret := make([]string, len(model.Classes))
 
-	for i, class := range model.Classes {
+	for f, class := range model.Classes {
 		scores := make(map[string]float64)
 
-		for _, c := range class {
-			scores[c] = model.Prior[i][c]
+		for _, class := range class {
+			scores[class] = model.Prior[f][class]
 
-			for _, token := range input {
-				if cp, ok := model.Condprob[i][token]; ok && cp[c] > 0 {
-					scores[c] += cp[c]
+			for _, token := range x {
+				if condprob, ok := model.CondProb[f][token]; ok {
+					scores[class] += condprob[class]
 				}
 			}
 		}
 
-		ret[i] = argmax(scores)
+		ret[f] = argmax(scores)
 	}
 
 	return ret
-}
-
-func (model MultinomialNB) Predict(example string) []string {
-	return model.PredictVector(StemExample(example))
 }
