@@ -4,9 +4,9 @@ Easy-to-use Go implementation of the multinomial Naive Bayes for multilabel text
 
 ## install
 
-```bash
-$ go get -u github.com/haydenhigg/bengal
-```
+In the terminal:
+
+`go get github.com/haydenhigg/bengal`
 
 Then, import it as:
 ```go
@@ -39,3 +39,7 @@ func main() {
   fmt.Println(model.Predict([]string {"...", ...}))
 }
 ```
+
+## notes
+
+- It is recommended to stem all input examples using something like [this](https://github.com/dchest/stemmer) before training or predicting.
