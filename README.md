@@ -8,7 +8,7 @@ Easy-to-use Go implementation of the multinomial Naive Bayes for multilabel text
 
 Then, import it as:
 ```go
-import "bengal"
+import "github.com/haydenhigg/bengal"
 ```
 
 ## use
