@@ -4,34 +4,19 @@ Easy-to-use Go implementation of the multinomial Naive Bayes for multilabel text
 
 ## install
 
-Install the Porter2 implementation with:
-`$ go get -u github.com/dchest/stemmer/porter2`
+`$ go get -u https://github.com/haydenhigg/bengal`
 
-Then, while in your project directory:
-`$ git clone https://github.com/haydenhigg/bengal`
-
-Finally, import it as:
+Then, import it as:
 ```go
-import "./bengal"
+import "bengal"
 ```
 
 ## use
 
-### modelling
+### modeling
 
-- `StemExample(text string) []string`: Tokenizes a string.
-- `StemExamples(examples []string) [][]string`: Tokenizes a slice of strings using `StemExample`.
-- `NewModel(examples []string, output [][]string) MultinomialNB`: Tokenizes the inputs using `StemExamples` and creates a model from them.
-- `NewModelFromVectors(input [][]string, output [][]string) MultinomialNB`: Creates a model from tokenized inputs.
-- `(model MultinomialNB) Predict(example string) []string`: Predicts the classes of the input example using `StemExample`.
-- `(model MultinomialNB) PredictVector(input []string) []string`: Predicts the classes of the tokenized input.
-
-### serializing
-
-- `(model *MultinomialNB) Serialize() ([]byte, error)`: Serializes a model to a JSON-formatted byte slice.
-- `(model *MultinomialNB) SerializeTo(filename string) ([]byte, error)`: Serializes a model to a JSON byte slice and write it to file `filename` (creates the file if it does not exist).
-- `Deserialize(bytes []byte) (*MultinomialNB, error)`: Deserializes a model from a JSON-formatted byte slice.
-- `DeserializeFrom(filename string) (*MultinomialNB, error)`: Deserializes a model from a JSON-formatted byte slice read from file `filename`.
+- `NewModelFromVectors(input, output [][]string) MultinomialNB`: Creates a model from tokenized inputs.
+- `(model *MultinomialNB) PredictVector(x []string) []string`: Predicts the classes of the tokenized input.
 
 ### example
 
@@ -40,15 +25,15 @@ package main
 
 import (
   "fmt"
-  "./bengal"
+  "bengal"
 )
 
 func main() {
-  inputs := []string{"...", "...", ...}
-  outputs := []string{[]string{"feature1class1", "feature2class1"}, []string{"feature1class2", "feature2class2"}, ...}
+  inputs := [][]string {[]string {"...", ...}, []string {"...", ...}, ...}
+  outputs := [][]string {[]string {"label1-1", "label2-1"}, []string {"label1-2", "label2-2"}, ...}
   
   model := bengal.NewModel(inputs, outputs)
   
-  fmt.Println(model.Predict("..."))
+  fmt.Println(model.Predict([]string {"...", ...}))
 }
 ```
