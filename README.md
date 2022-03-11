@@ -18,7 +18,7 @@ import "github.com/haydenhigg/bengal"
 ### modeling
 
 - `NewModel(input, output [][]string) MultinomialNB`: Creates a model from tokenized inputs.
-- `(model *MultinomialNB) Predict(x []string) []string`: Predicts the classes of a tokenized input.
+- `(model *MultinomialNB) Predict(x []string) []string`: Predicts the labels of a tokenized input.
 
 ### example
 
