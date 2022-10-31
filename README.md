@@ -1,24 +1,26 @@
 # bengal
 
-Easy-to-use Go implementation of the multinomial Naive Bayes for multilabel text classification.
+Easy-to-use Go implementations of two Naive Bayes classifiers for multilabel text classification.
 
 ## install
 
-In the terminal:
+In your project:
 
-`go get github.com/haydenhigg/bengal`
+`$ go get -u github.com/haydenhigg/bengal/v2`
 
 Then, import it as:
 ```go
-import "github.com/haydenhigg/bengal"
+import "github.com/haydenhigg/bengal/v2"
 ```
 
 ## use
 
 ### modeling
 
-- `NewModel(input, output [][]string) MultinomialNB`: Creates a model from tokenized inputs.
-- `(model *MultinomialNB) Predict(x []string) []string`: Predicts the labels of a tokenized input.
+- `TrainMultinomial(input, output [][]string) NaiveBayesModel`: Creates a multinomial model from tokenized inputs.
+- `(model *NaiveBayesModel) PredictMultinomial(x []string) []string`: Predicts the labels of a tokenized input.
+- `TrainBernoulli(input, output [][]string) NaiveBayesModel`: Creates a Bernoulli model from tokenized inputs.
+- `(model *NaiveBayesModel) PredictBernoulli(x []string) []string`: Predicts the labels of a tokenized input.
 
 ### example
 
@@ -31,12 +33,21 @@ import (
 )
 
 func main() {
-  inputs := [][]string {[]string {"...", ...}, []string {"...", ...}, ...}
-  outputs := [][]string {[]string {"label1-1", "label2-1"}, []string {"label1-2", "label2-2"}, ...}
+  inputs := [][]string{
+    []string{"...", ...},
+    []string{"...", ...},
+    ...,
+  }
+
+  outputs := [][]string{
+    []string{"label1-1", "label2-1"},
+    []string{"label1-2", "label2-2"},
+    ...,
+  }
   
-  model := bengal.NewModel(inputs, outputs)
+  model := bengal.NewBernoulli(inputs, outputs)
   
-  fmt.Println(model.Predict([]string {"...", ...}))
+  fmt.Println(model.PredictBernoulli([]string {"...", ...}))
 }
 ```
 
