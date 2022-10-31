@@ -41,21 +41,26 @@ func TrainBernoulli(input, output [][]string) NaiveBayesModel {
 			nClass := len(examplesInClass)
 			prior[f][class] = math.Log1p(float64(nClass) / float64(n))
 
+			// Count number of examples with each token
+			exampleCountsForTokens := make(map[string]int)
+
+			for _, example := range examplesInClass {
+				for _, token := range example {
+					if _, ok := exampleCountsForTokens[token]; ok {
+						exampleCountsForTokens[token]++
+					} else {
+						exampleCountsForTokens = 1
+					}
+				}
+			}
+
 			// Define conditional probabilities
 			for _, token := range vocabulary {
 				if _, ok := condprob[f][token]; !ok {
 					condprob[f][token] = make(map[string]float64)
 				}
 
-				nExamplesWithTokenInClass := 0
-
-				for _, example := range examplesInClass {
-					if contains(example, token) {
-						nExamplesWithTokenInClass++
-					}
-				}
-
-				condprob[f][token][class] = float64(1 + nExamplesWithTokenInClass) / float64(2 + nClass)
+				condprob[f][token][class] = float64(1 + exampleCountsForTokens[token]) / float64(2 + nClass)
 			}
 		}
 	}
