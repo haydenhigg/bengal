@@ -83,7 +83,7 @@ func (model NaiveBayesModel) PredictBernoulli(x []string) []string {
 
 			for _, token := range x {
 				if condprob, ok := model.CondProb[f][token]; ok {
-					scores[class] += math.Log1P(condprob[class])
+					scores[class] += math.Log1p(condprob[class])
 				} else {
 					scores[class] += math.Log1p(1 - condprob[class])
 				}
