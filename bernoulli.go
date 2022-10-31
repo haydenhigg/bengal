@@ -49,7 +49,7 @@ func TrainBernoulli(input, output [][]string) NaiveBayesModel {
 					if _, ok := exampleCountsForTokens[token]; ok {
 						exampleCountsForTokens[token]++
 					} else {
-						exampleCountsForTokens = 1
+						exampleCountsForTokens[token] = 1
 					}
 				}
 			}
