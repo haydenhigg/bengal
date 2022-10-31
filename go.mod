@@ -1,3 +1,3 @@
-module github.com/haydenhigg/bengal
+module github.com/haydenhigg/bengal/v2
 
-go 1.16
+go 1.18

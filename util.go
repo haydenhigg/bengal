@@ -32,6 +32,16 @@ func flatten2d(mat [][]string) []string {
 	return ret
 }
 
+func contains(arr []string, search string) bool {
+	for _, v := range arr {
+		if v == search {
+			return true
+		}
+	}
+
+	return false
+}
+
 func argmax(m map[string]float64) string {
 	bestArg := ""
 	bestVal := math.Inf(-1)
