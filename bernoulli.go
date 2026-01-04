@@ -2,7 +2,7 @@ package bengal
 
 import "math"
 
-func TrainBernoulli(input, output [][]string) NaiveBayesModel {
+func TrainBernoulli(input, output [][]string) *NaiveBayesModel {
 	features := len(output[0])
 
 	vocabulary := unique(flatten2d(input))
@@ -22,7 +22,7 @@ func TrainBernoulli(input, output [][]string) NaiveBayesModel {
 		}
 
 		classes[f] = unique(featureClasses)
-		
+
 		// Get prior and condprob for this feature
 		prior[f] = make(map[string]float64)
 		condprob[f] = make(map[string]map[string]float64)
@@ -46,11 +46,11 @@ func TrainBernoulli(input, output [][]string) NaiveBayesModel {
 
 			for _, example := range examplesInClass {
 				for _, token := range example {
-					if _, ok := exampleCountsForTokens[token]; ok {
-						exampleCountsForTokens[token]++
-					} else {
-						exampleCountsForTokens[token] = 1
+					if _, ok := exampleCountsForTokens[token]; !ok {
+						exampleCountsForTokens[token] = 0
 					}
+
+					exampleCountsForTokens[token]++
 				}
 			}
 
@@ -65,19 +65,19 @@ func TrainBernoulli(input, output [][]string) NaiveBayesModel {
 		}
 	}
 
-	return NaiveBayesModel{
+	return &NaiveBayesModel{
 		vocabulary: vocabulary,
 		Classes: classes,
 
 		Prior: prior,
 		CondProb: condprob,
-		
+
 		Input: input,
 		Output: output,
 	}
 }
 
-func (model NaiveBayesModel) PredictBernoulli(x []string) []string {
+func (model *NaiveBayesModel) PredictBernoulli(x []string) []string {
 	ret := make([]string, len(model.Classes))
 
 	for f, feature := range model.Classes {

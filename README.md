@@ -44,9 +44,9 @@ func main() {
     []string{"label1-2", "label2-2"},
     ...,
   }
-  
-  model := bengal.NewBernoulli(inputs, outputs)
-  
+
+  model := bengal.TrainBernoulli(inputs, outputs)
+
   fmt.Println(model.PredictBernoulli([]string {"...", ...}))
 }
 ```
@@ -54,3 +54,4 @@ func main() {
 ## notes
 
 - It is recommended to stem all input examples using something like [this](https://github.com/dchest/stemmer) before training or predicting.
+- This uses log probabilities and Laplace smoothing for robustness.

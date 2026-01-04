@@ -2,7 +2,7 @@ package bengal
 
 import "math"
 
-func TrainMultinomial(input, output [][]string) NaiveBayesModel {
+func TrainMultinomial(input, output [][]string) *NaiveBayesModel {
 	features := len(output[0])
 
 	vocabulary := unique(flatten2d(input))
@@ -23,7 +23,7 @@ func TrainMultinomial(input, output [][]string) NaiveBayesModel {
 		}
 
 		classes[f] = unique(featureClasses)
-		
+
 		// Get prior and condprob for this feature
 		prior[f] = make(map[string]float64)
 		condprob[f] = make(map[string]map[string]float64)
@@ -49,10 +49,10 @@ func TrainMultinomial(input, output [][]string) NaiveBayesModel {
 
 			for _, token := range examplesInClassVocabulary {
 				if _, ok := tokenCounts[token]; ok {
-					tokenCounts[token]++
-				} else {
-					tokenCounts[token] = 1
+					tokenCounts[token] = 0
 				}
+
+				tokenCounts[token]++
 			}
 
 			// Define conditional probabilities
@@ -73,19 +73,19 @@ func TrainMultinomial(input, output [][]string) NaiveBayesModel {
 		}
 	}
 
-	return NaiveBayesModel{
+	return &NaiveBayesModel{
 		vocabulary: vocabulary,
 		Classes: classes,
 
 		Prior: prior,
 		CondProb: condprob,
-		
+
 		Input: input,
 		Output: output,
 	}
 }
 
-func (model NaiveBayesModel) PredictMultinomial(x []string) []string {
+func (model *NaiveBayesModel) PredictMultinomial(x []string) []string {
 	ret := make([]string, len(model.Classes))
 
 	for f, feature := range model.Classes {
