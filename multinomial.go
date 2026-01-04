@@ -48,7 +48,7 @@ func TrainMultinomial(input, output [][]string) *NaiveBayesModel {
 			tokenCounts := make(map[string]int)
 
 			for _, token := range examplesInClassVocabulary {
-				if _, ok := tokenCounts[token]; ok {
+				if _, ok := tokenCounts[token]; !ok {
 					tokenCounts[token] = 0
 				}
 
