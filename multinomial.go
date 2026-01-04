@@ -3,18 +3,18 @@ package bengal
 import "math"
 
 func TrainMultinomial(input, output [][]string) *NaiveBayesModel {
-	features := len(output[0])
+	numOfOutputFeatures := len(output[0])
 
 	vocabulary := unique(flatten2d(input))
-	classes := make([][]string, features)
+	classes := make([][]string, numOfOutputFeatures)
 
-	prior := make([]map[string]float64, features)
-	condprob := make([]map[string]map[string]float64, features)
+	prior := make([]map[string]float64, numOfOutputFeatures)
+	condprob := make([]map[string]map[string]float64, numOfOutputFeatures)
 
 	n := len(input)
 	nVocabulary := len(vocabulary)
 
-	for f := 0; f < features; f++ {
+	for f := range numOfOutputFeatures {
 		// Get classes for this feature
 		featureClasses := make([]string, len(output))
 
@@ -40,7 +40,7 @@ func TrainMultinomial(input, output [][]string) *NaiveBayesModel {
 
 			// Define prior probabilities from raw class frequency
 			nClass := len(examplesInClass)
-			prior[f][class] = math.Log1p(float64(nClass) / float64(n))
+			prior[f][class] = math.Log(float64(nClass) / float64(n))
 
 			// Count tokens in class examples
 			examplesInClassVocabulary := flatten2d(examplesInClass)
@@ -68,7 +68,7 @@ func TrainMultinomial(input, output [][]string) *NaiveBayesModel {
 				}
 
 				nonMonotonic := float64(1 + thisTokenCount) / float64(nExampleVocabulary + nVocabulary)
-				condprob[f][token][class] = math.Log1p(nonMonotonic)
+				condprob[f][token][class] = math.Log(nonMonotonic)
 			}
 		}
 	}

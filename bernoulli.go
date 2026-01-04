@@ -3,17 +3,17 @@ package bengal
 import "math"
 
 func TrainBernoulli(input, output [][]string) *NaiveBayesModel {
-	features := len(output[0])
+	numOfOutputFeatures := len(output[0])
 
 	vocabulary := unique(flatten2d(input))
-	classes := make([][]string, features)
+	classes := make([][]string, numOfOutputFeatures)
 
-	prior := make([]map[string]float64, features)
-	condprob := make([]map[string]map[string]float64, features)
+	prior := make([]map[string]float64, numOfOutputFeatures)
+	condprob := make([]map[string]map[string]float64, numOfOutputFeatures)
 
 	n := len(input)
 
-	for f := 0; f < features; f++ {
+	for f := range numOfOutputFeatures {
 		// Get classes for this feature
 		featureClasses := make([]string, len(output))
 
@@ -88,9 +88,9 @@ func (model *NaiveBayesModel) PredictBernoulli(x []string) []string {
 
 			for _, token := range x {
 				if condprob, ok := model.CondProb[f][token]; ok {
-					scores[class] += math.Log1p(condprob[class])
+					scores[class] += math.Log(condprob[class])
 				} else {
-					scores[class] += math.Log1p(1 - condprob[class])
+					scores[class] += math.Log(1 - condprob[class])
 				}
 			}
 		}
