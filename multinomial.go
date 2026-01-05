@@ -2,107 +2,103 @@ package bengal
 
 import "math"
 
-func TrainMultinomial(input, output [][]string) *NaiveBayesModel {
-	numOfOutputFeatures := len(output[0])
+func NewMultinomial(xs, ys [][]string, alpha float64) (*Model, error) {
+	// confirm assumptions
+	n := len(xs)
+	if len(ys) != n {
+		return nil, MismatchedXsYsError
+	}
 
-	vocabulary := unique(flatten2d(input))
-	classes := make([][]string, numOfOutputFeatures)
+	numLabels := len(ys[0])
+	for _, y := range ys {
+		if len(y) != numLabels {
+			return nil, YsShapeError
+		}
+	}
 
-	prior := make([]map[string]float64, numOfOutputFeatures)
-	condprob := make([]map[string]map[string]float64, numOfOutputFeatures)
+	// create model
+	model := &Model{
+		xs:         xs,
+		ys:         ys,
+		Vocabulary: unique(flatten2d(xs)),
+		Classes:    make([][]string, numLabels),
+		Prior:      make([]map[string]float64, numLabels),
+		CondProb:   make([]map[string]map[string]float64, numLabels),
+	}
 
-	n := len(input)
-	nVocabulary := len(vocabulary)
-
-	for f := range numOfOutputFeatures {
+	for l := range numLabels {
 		// Get classes for this feature
-		featureClasses := make([]string, len(output))
-
-		for i, y := range output {
-			featureClasses[i] = y[f]
+		featureClasses := make([]string, n)
+		for i, y := range ys {
+			featureClasses[i] = y[l]
 		}
 
-		classes[f] = unique(featureClasses)
+		model.Classes[l] = unique(featureClasses)
 
 		// Get prior and condprob for this feature
-		prior[f] = make(map[string]float64)
-		condprob[f] = make(map[string]map[string]float64)
+		model.Prior[l] = make(map[string]float64, len(model.Classes[l]))
+		model.CondProb[l] = make(map[string]map[string]float64)
 
-		for _, class := range classes[f] {
-			// Find class examples
-			var examplesInClass [][]string
-
-			for i, x := range input {
-				if output[i][f] == class {
-					examplesInClass = append(examplesInClass, x)
+		for _, class := range model.Classes[l] {
+			// find class examples
+			var xsOfClass [][]string
+			for i, x := range xs {
+				if ys[i][l] == class {
+					xsOfClass = append(xsOfClass, x)
 				}
 			}
 
-			// Define prior probabilities from raw class frequency
-			nClass := len(examplesInClass)
-			prior[f][class] = math.Log(float64(nClass) / float64(n))
+			numXsOfClass := float64(len(xsOfClass))
 
-			// Count tokens in class examples
-			examplesInClassVocabulary := flatten2d(examplesInClass)
-			nExampleVocabulary := len(examplesInClassVocabulary)
-			tokenCounts := make(map[string]int)
+			// calculate prior probability
+			model.Prior[l][class] = math.Log(numXsOfClass / float64(n))
 
-			for _, token := range examplesInClassVocabulary {
-				if _, ok := tokenCounts[token]; !ok {
-					tokenCounts[token] = 0
+			// calculate conditional probabilities
+			numTokensInClass := make(map[string]float64)
+			for _, x := range xsOfClass {
+				for _, token := range x {
+					if _, ok := numTokensInClass[token]; !ok {
+						numTokensInClass[token] = 1
+					} else {
+						numTokensInClass[token]++
+					}
 				}
-
-				tokenCounts[token]++
 			}
 
-			// Define conditional probabilities
-			for _, token := range vocabulary {
-				if _, ok := condprob[f][token]; !ok {
-					condprob[f][token] = make(map[string]float64)
+			numUniqueTokensInClass := float64(len(numTokensInClass))
+
+			for _, token := range model.Vocabulary {
+				if _, ok := model.CondProb[l][token]; !ok {
+					model.CondProb[l][token] = make(map[string]float64)
 				}
 
-				thisTokenCount := 0
-
-				if tokenCount, ok := tokenCounts[token]; ok {
-					thisTokenCount = tokenCount
-				}
-
-				nonMonotonic := float64(1 + thisTokenCount) / float64(nExampleVocabulary + nVocabulary)
-				condprob[f][token][class] = math.Log(nonMonotonic)
+				model.CondProb[l][token][class] = (numTokensInClass[token] + alpha) / numUniqueTokensInClass
 			}
 		}
 	}
 
-	return &NaiveBayesModel{
-		vocabulary: vocabulary,
-		Classes: classes,
-
-		Prior: prior,
-		CondProb: condprob,
-
-		Input: input,
-		Output: output,
-	}
+	return model, nil
 }
 
-func (model *NaiveBayesModel) PredictMultinomial(x []string) []string {
-	ret := make([]string, len(model.Classes))
+func (model *Model) PredictMultinomial(x []string) []string {
+	y := make([]string, len(model.Classes))
 
-	for f, feature := range model.Classes {
-		scores := make(map[string]float64)
+	// infer the best class per label
+	for l, classes := range model.Classes {
+		scores := make([]float64, len(classes))
 
-		for _, class := range feature {
-			scores[class] = model.Prior[f][class]
+		for c, class := range classes {
+			scores[c] = model.Prior[l][class]
 
 			for _, token := range x {
-				if condprob, ok := model.CondProb[f][token]; ok {
-					scores[class] += condprob[class]
+				if tokenCondProb, ok := model.CondProb[l][token]; ok {
+					scores[c] += math.Log(tokenCondProb[class])
 				}
 			}
 		}
 
-		ret[f] = argmax(scores)
+		y[l] = argmax(classes, scores)
 	}
 
-	return ret
+	return y
 }

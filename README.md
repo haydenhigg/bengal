@@ -1,9 +1,7 @@
 # bengal
-
 Easy-to-use Go implementations of two Naive Bayes classifiers for multilabel text classification.
 
 ## install
-
 In your project:
 
 `$ go get -u github.com/haydenhigg/bengal/v2`
@@ -14,16 +12,13 @@ import "github.com/haydenhigg/bengal/v2"
 ```
 
 ## use
-
 ### modeling
-
-- `TrainMultinomial(input, output [][]string) NaiveBayesModel`: Creates a multinomial model from tokenized inputs.
-- `(model *NaiveBayesModel) PredictMultinomial(x []string) []string`: Predicts the labels of a tokenized input.
-- `TrainBernoulli(input, output [][]string) NaiveBayesModel`: Creates a Bernoulli model from tokenized inputs.
-- `(model *NaiveBayesModel) PredictBernoulli(x []string) []string`: Predicts the labels of a tokenized input.
+- `TrainMultinomial(xs, ys [][]string, smoothing float64) NaiveBayesModel`: Creates and trains a multinomial model.
+- `(model *NaiveBayesModel) PredictMultinomial(x []string) []string`: Predicts the labels for an input using token presence only.
+- `NewBernoulli(xs, ys [][]string, smoothing float64) NaiveBayesModel`: Creates and trains a Bernoulli model.
+- `(model *NaiveBayesModel) PredictBernoulli(x []string) []string`: Predicts the labels for an input using token presence and absence.
 
 ### example
-
 ```go
 package main
 
@@ -33,25 +28,27 @@ import (
 )
 
 func main() {
-  inputs := [][]string{
-    []string{"...", ...},
-    []string{"...", ...},
-    ...,
-  }
+	inputs := [][]string{
+		[]string{"the", "cat", "was", "crying"},
+		[]string{"dogs", "like", "to", "smile"},
+		...,
+	}
 
-  outputs := [][]string{
-    []string{"label1-1", "label2-1"},
-    []string{"label1-2", "label2-2"},
-    ...,
-  }
+	outputs := [][]string{
+		[]string{"cat", "sad"},
+		[]string{"dog", "happy"},
+		...,
+	}
 
-  model := bengal.TrainBernoulli(inputs, outputs)
+	smoothing := 1.0
 
-  fmt.Println(model.PredictBernoulli([]string {"...", ...}))
+	model := bengal.NewBernoulli(inputs, outputs, smoothing)
+
+	fmt.Println(model.PredictBernoulli([]string{...}))
 }
 ```
 
 ## notes
-
 - It is recommended to stem all input examples using something like [this](https://github.com/dchest/stemmer) before training or predicting.
 - This uses log probabilities and Laplace smoothing for robustness.
+- It's possible to use a prediction method that doesn't match the training method.

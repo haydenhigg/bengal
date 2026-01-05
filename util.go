@@ -2,46 +2,46 @@ package bengal
 
 import "math"
 
-func unique(arr []string) []string {
-	uniqueTokens := make(map[string]struct{})
+func unique[T comparable](s []T) []T {
+	deduplicated := make(map[T]struct{})
 
-	for _, v := range arr {
-		if _, ok := uniqueTokens[v]; !ok {
-			uniqueTokens[v] = struct{}{}
+	for _, v := range s {
+		if _, ok := deduplicated[v]; !ok {
+			deduplicated[v] = struct{}{}
 		}
 	}
 
-	keys := make([]string, len(uniqueTokens))
+	keys := make([]T, len(deduplicated))
 	i := 0
 
-	for token := range uniqueTokens {
-		keys[i] = token
+	for v := range deduplicated {
+		keys[i] = v
 		i++
 	}
 
 	return keys
 }
 
-func flatten2d(mat [][]string) []string {
-	var ret []string
+func flatten2d[T any](s [][]T) []T {
+	var flattened []T
 
-	for _, r := range mat {
-		ret = append(ret, r...)
+	for _, v := range s {
+		flattened = append(flattened, v...)
 	}
 
-	return ret
+	return flattened
 }
 
-func argmax(m map[string]float64) string {
-	bestArg := ""
-	bestVal := math.Inf(-1)
+func argmax[T any](keys []T, values []float64) T {
+	var bestKey T
+	bestValue := math.Inf(-1)
 
-	for k, v := range m {
-		if v > bestVal {
-			bestArg = k
-			bestVal = v
+	for i, value := range values {
+		if value > bestValue {
+			bestKey = keys[i]
+			bestValue = value
 		}
 	}
 
-	return bestArg
+	return bestKey
 }
