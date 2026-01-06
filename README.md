@@ -24,7 +24,7 @@ package main
 
 import (
   "fmt"
-  "bengal"
+  "github.com/haydenhigg/bengal"
 )
 
 func main() {
@@ -50,4 +50,4 @@ func main() {
 ## notes
 - It is recommended to stem all input examples using something like [this](https://github.com/dchest/stemmer) before training or predicting.
 - This uses log probabilities and smoothing for robustness.
-- It's possible to use a prediction function that does not match the training function. i.e. to use `NewBernoulli` for training but `PredictMultinomial` for faster -- and similarly accurate on most data -- predictions.
+- It's viable to use a different training function than prediction function. You can use `NewBernoulli` for training but `PredictMultinomial` for faster -- and similarly accurate on short documents -- predictions.
