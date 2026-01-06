@@ -16,11 +16,15 @@ func NewMultinomial(xs, ys [][]string, alpha float64) (*Model, error) {
 		}
 	}
 
+	if alpha <= 0 {
+		return nil, AlphaDomainError
+	}
+
 	// create model
 	model := &Model{
 		xs:         xs,
 		ys:         ys,
-		Vocabulary: unique(flatten2d(xs)),
+		Vocabulary: deduplicate(flatten2d(xs)),
 		Classes:    make([][]string, numLabels),
 		Prior:      make([]map[string]float64, numLabels),
 		CondProb:   make([]map[string]map[string]float64, numLabels),
@@ -33,7 +37,7 @@ func NewMultinomial(xs, ys [][]string, alpha float64) (*Model, error) {
 			featureClasses[i] = y[l]
 		}
 
-		model.Classes[l] = unique(featureClasses)
+		model.Classes[l] = deduplicate(featureClasses)
 
 		// Get prior and condprob for this feature
 		model.Prior[l] = make(map[string]float64, len(model.Classes[l]))
@@ -54,25 +58,28 @@ func NewMultinomial(xs, ys [][]string, alpha float64) (*Model, error) {
 			model.Prior[l][class] = math.Log(numXsOfClass / float64(n))
 
 			// calculate conditional probabilities
-			numTokensInClass := make(map[string]float64)
+			numInClassPerToken := make(map[string]float64)
 			for _, x := range xsOfClass {
 				for _, token := range x {
-					if _, ok := numTokensInClass[token]; !ok {
-						numTokensInClass[token] = 1
+					if _, ok := numInClassPerToken[token]; !ok {
+						numInClassPerToken[token] = 1
 					} else {
-						numTokensInClass[token]++
+						numInClassPerToken[token]++
 					}
 				}
 			}
 
-			numUniqueTokensInClass := float64(len(numTokensInClass))
+			numTokensInClass := 0.
+			for _, v := range numInClassPerToken {
+				numTokensInClass += v
+			}
 
 			for _, token := range model.Vocabulary {
 				if _, ok := model.CondProb[l][token]; !ok {
 					model.CondProb[l][token] = make(map[string]float64)
 				}
 
-				model.CondProb[l][token][class] = (numTokensInClass[token] + alpha) / numUniqueTokensInClass
+				model.CondProb[l][token][class] = (numInClassPerToken[token] + alpha) / (numTokensInClass + alpha*float64(len(model.Vocabulary)))
 			}
 		}
 	}

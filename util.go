@@ -2,19 +2,24 @@ package bengal
 
 import "math"
 
-func unique[T comparable](s []T) []T {
-	deduplicated := make(map[T]struct{})
+func mapOf[T comparable](s []T) map[T]struct{} {
+	m := make(map[T]struct{})
 
 	for _, v := range s {
-		if _, ok := deduplicated[v]; !ok {
-			deduplicated[v] = struct{}{}
+		if _, ok := m[v]; !ok {
+			m[v] = struct{}{}
 		}
 	}
 
-	keys := make([]T, len(deduplicated))
+	return m
+}
+
+func deduplicate[T comparable](s []T) []T {
+	m := mapOf(s)
+	keys := make([]T, len(m))
 	i := 0
 
-	for v := range deduplicated {
+	for v := range m {
 		keys[i] = v
 		i++
 	}

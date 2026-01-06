@@ -1,11 +1,8 @@
 package bengal
 
-import (
-	"math"
-	"slices"
-)
+import "math"
 
-func NewBernoulli(xs, ys [][]string, smoothing float64) (*Model, error) {
+func NewBernoulli(xs, ys [][]string, alpha float64) (*Model, error) {
 	// confirm assumptions
 	n := len(xs)
 	if len(ys) != n {
@@ -19,11 +16,15 @@ func NewBernoulli(xs, ys [][]string, smoothing float64) (*Model, error) {
 		}
 	}
 
+	if alpha <= 0 {
+		return nil, AlphaDomainError
+	}
+
 	// create model
 	model := &Model{
 		xs:         xs,
 		ys:         ys,
-		Vocabulary: unique(flatten2d(xs)),
+		Vocabulary: deduplicate(flatten2d(xs)),
 		Classes:    make([][]string, numLabels),
 		Prior:      make([]map[string]float64, numLabels),
 		CondProb:   make([]map[string]map[string]float64, numLabels),
@@ -36,7 +37,7 @@ func NewBernoulli(xs, ys [][]string, smoothing float64) (*Model, error) {
 			featureClasses[i] = y[l]
 		}
 
-		model.Classes[l] = unique(featureClasses)
+		model.Classes[l] = deduplicate(featureClasses)
 
 		// find probabilities
 		model.Prior[l] = make(map[string]float64, len(model.Classes[l]))
@@ -59,7 +60,7 @@ func NewBernoulli(xs, ys [][]string, smoothing float64) (*Model, error) {
 			// calculate conditional probabilities
 			numXsOfClassPerToken := make(map[string]float64)
 			for _, x := range xsOfClass {
-				for _, token := range unique(x) {
+				for _, token := range deduplicate(x) {
 					numXsOfClassPerToken[token]++
 				}
 			}
@@ -69,7 +70,7 @@ func NewBernoulli(xs, ys [][]string, smoothing float64) (*Model, error) {
 					model.CondProb[l][token] = make(map[string]float64)
 				}
 
-				model.CondProb[l][token][class] = (numXsOfClassPerToken[token] + smoothing) / (numXsOfClass + 2*smoothing)
+				model.CondProb[l][token][class] = (numXsOfClassPerToken[token] + alpha) / (numXsOfClass + alpha*2)
 			}
 		}
 	}
@@ -81,6 +82,8 @@ func (model *Model) PredictBernoulli(x []string) []string {
 	y := make([]string, len(model.Classes))
 
 	// infer the best class per label
+	xMap := mapOf(x)
+
 	for l, classes := range model.Classes {
 		scores := make([]float64, len(classes))
 
@@ -88,7 +91,7 @@ func (model *Model) PredictBernoulli(x []string) []string {
 			scores[c] = model.Prior[l][class]
 
 			for _, token := range model.Vocabulary {
-				if slices.Contains(x, token) {
+				if _, ok := xMap[token]; ok {
 					scores[c] += math.Log(model.CondProb[l][token][class])
 				} else {
 					scores[c] += math.Log(1 - model.CondProb[l][token][class])

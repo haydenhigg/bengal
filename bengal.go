@@ -14,3 +14,4 @@ type Model struct {
 
 var MismatchedXsYsError = errors.New("number of inputs does not match number of outputs")
 var YsShapeError = errors.New("outputs cannot be aligned")
+var AlphaDomainError = errors.New("smoothing constant must be greater than 0")
