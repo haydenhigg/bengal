@@ -4,11 +4,11 @@ Optimized Go implementation of Naive Bayes classifiers for multilabel text class
 ## install
 In your project:
 
-`$ go get github.com/haydenhigg/bengal/v2`
+`$ go get github.com/haydenhigg/bengal`
 
 Then, import it as:
 ```go
-import "github.com/haydenhigg/bengal/v2"
+import "github.com/haydenhigg/bengal"
 ```
 
 ## use

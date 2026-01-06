@@ -1,3 +1,3 @@
-module github.com/haydenhigg/bengal/v2
+module github.com/haydenhigg/bengal
 
 go 1.22
