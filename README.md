@@ -1,10 +1,10 @@
 # bengal
-Easy-to-use Go implementations of two Naive Bayes classifiers for multilabel text classification.
+Optimized Go implementation of Naive Bayes classifiers for multilabel text classification.
 
 ## install
 In your project:
 
-`$ go get -u github.com/haydenhigg/bengal/v2`
+`$ go get github.com/haydenhigg/bengal/v2`
 
 Then, import it as:
 ```go
@@ -40,8 +40,7 @@ func main() {
 		...,
 	}
 
-	smoothing := 1.0
-
+	smoothing := 1.0 // fix the zero-probability problem, 1.0 is common
 	model := bengal.NewBernoulli(inputs, outputs, smoothing)
 
 	fmt.Println(model.PredictBernoulli([]string{...}))
@@ -50,5 +49,5 @@ func main() {
 
 ## notes
 - It is recommended to stem all input examples using something like [this](https://github.com/dchest/stemmer) before training or predicting.
-- This uses log probabilities and Laplace smoothing for robustness.
-- It's possible to use a prediction method that doesn't match the training method.
+- This uses log probabilities and smoothing for robustness.
+- It's possible to use a prediction function that does not match the training function. i.e. to use `NewBernoulli` for training but `PredictMultinomial` for faster -- and similarly accurate on most data -- predictions.
